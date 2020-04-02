@@ -34,5 +34,6 @@ class DevByteApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         Timber.plant(Timber.DebugTree())
+        Thread.sleep(4_000)
     }
 }
