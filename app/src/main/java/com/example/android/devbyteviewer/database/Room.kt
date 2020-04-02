@@ -17,6 +17,7 @@
 
 package com.example.android.devbyteviewer.database
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -24,8 +25,14 @@ import androidx.room.Query
 
 @Dao
 interface VideoDao {
+
+    /**
+     * We need to return a LiveData not a simple List in order of not blocking the UI
+     * So Room will do the database query in the background for us
+     * And it will update our displayed data any time new data is written to the table
+     */
     @Query("select * from databasevideo")
-    fun getVideos(): List<DatabaseVideo>
+    fun getVideos(): LiveData<List<DatabaseVideo>>
 
     // Vararg stands for variable arguments, and used foe passing an unknown number of arguments
     // it will pass an array under the hood
