@@ -16,3 +16,19 @@
  */
 
 package com.example.android.devbyteviewer.database
+
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+
+@Dao
+interface VideoDao {
+    @Query("select * from databasevideo")
+    fun getVideos(): List<DatabaseVideo>
+
+    // Vararg stands for variable arguments, and used foe passing an unknown number of arguments
+    // it will pass an array under the hood
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertAll(vararg videos: DatabaseVideo)
+}
