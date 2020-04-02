@@ -17,7 +17,11 @@
 
 package com.example.android.devbyteviewer.repository
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Transformations
 import com.example.android.devbyteviewer.database.VideosDatabase
+import com.example.android.devbyteviewer.database.asDomainModel
+import com.example.android.devbyteviewer.domain.Video
 import com.example.android.devbyteviewer.network.Network
 import com.example.android.devbyteviewer.network.asDatabaseModel
 import kotlinx.coroutines.Dispatchers
@@ -27,6 +31,17 @@ import kotlinx.coroutines.withContext
  * Repository for fetching devbyte videos from the network and storing them on disk.
  */
 class VideosRepository(private val database: VideosDatabase) {
+
+    /**
+     * A playlist of the videos that can be shown on the screen
+     */
+    // We want a LiveData of with a list of Videos. Video is the domain object.
+    // Room can return a LiveData of database objects called DatabaseVideo using the getVideos() method we wrote in the VideoDao.
+    // So we'll need to convert the list of DatabaseVideo to a list of Video
+    // Transformations.map is perfect for mapping the output of one LiveData to another type
+    val videos: LiveData<List<Video>> = Transformations.map(database.videoDao.getVideos()) {
+        it.asDomainModel()
+    }
 
     // Refreshing the offline cache
     // It's a suspend function because will be called from a co-routine
