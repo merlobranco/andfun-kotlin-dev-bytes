@@ -18,9 +18,8 @@
 package com.example.android.devbyteviewer
 
 import android.app.Application
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
+import android.os.Build
+import androidx.work.*
 import com.example.android.devbyteviewer.work.RefreshDataWorker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -50,9 +49,27 @@ class DevByteApplication : Application() {
     }
 
     private fun setupRecurringWork() {
+        // Defining constraints (It is connected to WIFI, no data, battery and is charging)
+        val constraints = Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.UNMETERED) // The user won't use their mobile data
+                .setRequiresBatteryNotLow(true)
+                .setRequiresCharging(true)
+                .apply {
+                    // For users of Android Marshmallow or above we could request that the device is idle
+                    // meaning the user is not actively using the device
+                    // and won't have their usage impacted by our background processing
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        setRequiresDeviceIdle(true)
+                    }
+                }.build()
+
+
         // Making a PeriodWorkRequest
         val repeatingRequest = PeriodicWorkRequestBuilder<RefreshDataWorker>(1, TimeUnit.DAYS)
+                .setConstraints(constraints)
                 .build()
+
+
 
         // Scheduling the work as unique and periodically executed
         WorkManager.getInstance().enqueueUniquePeriodicWork(
