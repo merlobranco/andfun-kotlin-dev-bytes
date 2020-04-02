@@ -18,12 +18,31 @@
 package com.example.android.devbyteviewer
 
 import android.app.Application
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 /**
  * Override application to setup background work via WorkManager
  */
 class DevByteApplication : Application() {
+    /**
+     * Let's take the extra initialization out
+     */
+    val applicationScope = CoroutineScope(Dispatchers.Default)
+
+    /**
+     * Creating an initialization function that does not block the main thread:
+     *
+     * It's important to note that WorkManager.initialize should be called from inside onCreate without using a background thread
+     * to avoid issues caused when initialization happens after WorkManager is used [1]
+     */
+    private fun delayedInit() {
+        applicationScope.launch {
+            Thread.sleep(4_000)
+        }
+    }
 
     /**
      * onCreate is called before the first screen is shown to the user.
@@ -34,6 +53,7 @@ class DevByteApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         Timber.plant(Timber.DebugTree())
-        Thread.sleep(4_000)
+        delayedInit()
+
     }
 }
